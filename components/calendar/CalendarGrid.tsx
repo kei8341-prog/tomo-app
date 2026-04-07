@@ -33,9 +33,16 @@ export default function CalendarGrid({
   const eventsByDate = useMemo(() => {
     const map: Record<string, Event[]> = {}
     const lastDate = new Date(year, month + 1, 0).getDate()
+    // 複数日イベントを先に並べることでレーンを一貫させる
+    const sorted = [...events].sort((a, b) => {
+      const aMulti = a.end_at && a.end_at.slice(0, 10) > a.start_at.slice(0, 10) ? 1 : 0
+      const bMulti = b.end_at && b.end_at.slice(0, 10) > b.start_at.slice(0, 10) ? 1 : 0
+      if (bMulti !== aMulti) return bMulti - aMulti
+      return a.start_at.localeCompare(b.start_at)
+    })
     for (let d = 1; d <= lastDate; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-      const dayEvents = events.filter(ev => {
+      const dayEvents = sorted.filter(ev => {
         const start = ev.start_at.slice(0, 10)
         const end = ev.end_at ? ev.end_at.slice(0, 10) : start
         return dateStr >= start && dateStr <= end
@@ -126,16 +133,47 @@ export default function CalendarGrid({
                 </span>
               </div>
               {/* イベントバー */}
-              <div className="w-full px-0.5 space-y-0.5 overflow-hidden">
-                {dayEvents.slice(0, 2).map(ev => (
-                  <div
-                    key={ev.id}
-                    className="text-[9px] leading-[13px] text-white rounded-sm px-1 truncate"
-                    style={{ backgroundColor: getUserColor(ev.owner_id) }}
-                  >
-                    {ev.title}
-                  </div>
-                ))}
+              <div className="w-full space-y-0.5 overflow-hidden">
+                {dayEvents.slice(0, 2).map(ev => {
+                  const evStart = ev.start_at.slice(0, 10)
+                  const evEnd = ev.end_at ? ev.end_at.slice(0, 10) : evStart
+                  const isMultiDay = evStart !== evEnd
+                  const color = getUserColor(ev.owner_id)
+
+                  if (!isMultiDay) {
+                    return (
+                      <div
+                        key={ev.id}
+                        className="text-[9px] leading-[13px] text-white rounded-sm mx-0.5 px-1 truncate"
+                        style={{ backgroundColor: color }}
+                      >
+                        {ev.title}
+                      </div>
+                    )
+                  }
+
+                  const isEvStart = dateStr === evStart
+                  const isEvEnd = dateStr === evEnd
+                  const isRowStart = dow === 0
+                  const isRowEnd = dow === 6
+                  const leftEdge = isEvStart || isRowStart
+                  const rightEdge = isEvEnd || isRowEnd
+                  const showTitle = isEvStart || isRowStart
+
+                  return (
+                    <div
+                      key={ev.id}
+                      className={`text-[9px] leading-[13px] text-white truncate ${
+                        leftEdge ? 'ml-0.5 rounded-l-sm pl-1' : 'ml-0 pl-0.5'
+                      } ${
+                        rightEdge ? 'mr-0.5 rounded-r-sm' : 'mr-0'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    >
+                      {showTitle ? ev.title : '\u00A0'}
+                    </div>
+                  )
+                })}
                 {dayEvents.length > 2 && (
                   <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 2}</p>
                 )}
