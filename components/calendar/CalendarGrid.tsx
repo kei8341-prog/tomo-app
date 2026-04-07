@@ -91,7 +91,7 @@ export default function CalendarGrid({
       <div className="grid grid-cols-7 border-t border-fog/50">
         {days.map((day, idx) => {
           if (day === null) {
-            return <div key={`empty-${idx}`} className="h-14 border-b border-r border-fog/30" />
+            return <div key={`empty-${idx}`} className="h-20 border-b border-r border-fog/30" />
           }
           const dateStr = toDateStr(day)
           const dayEvents = eventsByDate[dateStr] ?? []
@@ -105,34 +105,39 @@ export default function CalendarGrid({
             <button
               key={dateStr}
               onClick={() => onSelectDate(dateStr)}
-              className={`h-14 flex flex-col items-center pt-1.5 border-b border-r border-fog/30 transition relative ${
+              className={`h-20 flex flex-col pt-1 border-b border-r border-fog/30 transition relative w-full ${
                 isSelected ? 'bg-moss-pale' : 'hover:bg-sand/50'
               }`}
             >
-              <span
-                className={`text-xs w-6 h-6 flex items-center justify-center rounded-full font-medium ${
-                  isToday
-                    ? 'bg-moss text-cream'
-                    : isSundayColor
-                    ? 'text-wife'
-                    : dow === 6
-                    ? 'text-shared'
-                    : 'text-charcoal'
-                }`}
-              >
-                {day}
-              </span>
-              {/* イベントドット */}
-              <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center px-1">
-                {dayEvents.slice(0, 3).map(ev => (
-                  <span
+              {/* 日付 */}
+              <div className="flex justify-center mb-0.5">
+                <span
+                  className={`text-xs w-6 h-6 flex items-center justify-center rounded-full font-medium ${
+                    isToday
+                      ? 'bg-moss text-cream'
+                      : isSundayColor
+                      ? 'text-wife'
+                      : dow === 6
+                      ? 'text-shared'
+                      : 'text-charcoal'
+                  }`}
+                >
+                  {day}
+                </span>
+              </div>
+              {/* イベントバー */}
+              <div className="w-full px-0.5 space-y-0.5 overflow-hidden">
+                {dayEvents.slice(0, 2).map(ev => (
+                  <div
                     key={ev.id}
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    className="text-[9px] leading-[13px] text-white rounded-sm px-1 truncate"
                     style={{ backgroundColor: getUserColor(ev.owner_id) }}
-                  />
+                  >
+                    {ev.title}
+                  </div>
                 ))}
-                {dayEvents.length > 3 && (
-                  <span className="text-[8px] text-moss-light">+{dayEvents.length - 3}</span>
+                {dayEvents.length > 2 && (
+                  <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 2}</p>
                 )}
               </div>
             </button>
