@@ -61,25 +61,26 @@ export default function CalendarPage() {
         .select('*')
         .eq('couple_id', coupleId)
         .eq('is_yearly', false)
+        .gte('start_at', `${from}T00:00:00`)
         .lte('start_at', `${to}T23:59:59`)
-        .or(`end_at.gte.${from}T00:00:00,end_at.is.null,start_at.gte.${from}T00:00:00`)
         .order('start_at'),
       supabase
         .from('events')
         .select('*')
         .eq('couple_id', coupleId)
         .eq('is_yearly', true)
-        .filter('start_at', 'like', `%-${monthStr}-%`)
         .order('start_at'),
     ])
 
-    // 毎年イベントの日付を今年に合わせる
-    const adjustedYearly: Event[] = (yearly ?? []).map(ev => {
-      const origDay = ev.start_at.slice(8, 10)
-      const newStart = `${year}-${monthStr}-${origDay}${ev.start_at.slice(10)}`
-      const newEnd = ev.end_at ? `${year}-${monthStr}-${origDay}${ev.end_at.slice(10)}` : null
-      return { ...ev, start_at: newStart, end_at: newEnd }
-    })
+    // 毎年イベントを当月でフィルタして今年の日付に調整
+    const adjustedYearly: Event[] = (yearly ?? [])
+      .filter(ev => ev.start_at.slice(5, 7) === monthStr)
+      .map(ev => {
+        const origDay = ev.start_at.slice(8, 10)
+        const newStart = `${year}-${monthStr}-${origDay}${ev.start_at.slice(10)}`
+        const newEnd = ev.end_at ? `${year}-${monthStr}-${origDay}${ev.end_at.slice(10)}` : null
+        return { ...ev, start_at: newStart, end_at: newEnd }
+      })
 
     setEvents([...(regular ?? []), ...adjustedYearly].sort((a, b) => a.start_at.localeCompare(b.start_at)))
   }, [coupleId, year, month])
