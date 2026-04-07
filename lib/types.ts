@@ -45,7 +45,7 @@ export type Task = {
   id: string
   couple_id: string
   group_id: string
-  assignee_id: string
+  assignee_id: string | null
   created_by: string
   title: string
   due_date: string | null

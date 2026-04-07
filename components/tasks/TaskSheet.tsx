@@ -23,7 +23,7 @@ export default function TaskSheet({ open, onClose, task, defaultGroupId, current
 
   const [title, setTitle] = useState('')
   const [groupId, setGroupId] = useState(defaultGroupId ?? groups[0]?.id ?? '')
-  const [assigneeId, setAssigneeId] = useState(currentUser.id)
+  const [assigneeId, setAssigneeId] = useState<string | null>(currentUser.id)
   const [dueDate, setDueDate] = useState('')
   const [isRecurring, setIsRecurring] = useState(false)
   const [recurringDay, setRecurringDay] = useState<number>(1)
@@ -35,7 +35,7 @@ export default function TaskSheet({ open, onClose, task, defaultGroupId, current
     if (task) {
       setTitle(task.title)
       setGroupId(task.group_id)
-      setAssigneeId(task.assignee_id)
+      setAssigneeId(task.assignee_id ?? null)
       setDueDate(task.due_date ?? '')
       setIsRecurring(task.is_recurring)
       setRecurringDay(task.recurring_day ?? 1)
@@ -131,6 +131,14 @@ export default function TaskSheet({ open, onClose, task, defaultGroupId, current
                 {u.display_name}
               </button>
             ))}
+            <button
+              onClick={() => setAssigneeId(null)}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium border transition ${
+                assigneeId === null ? 'border-transparent bg-shared text-cream' : 'border-fog bg-white text-charcoal'
+              }`}
+            >
+              両方
+            </button>
           </div>
         </div>
 

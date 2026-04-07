@@ -66,20 +66,20 @@ export default function SettingsPage() {
 
         <div>
           <label className="block text-sm text-bark mb-1">表示名</label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <input
               type="text"
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-cream border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+              className="w-full px-4 py-2.5 rounded-xl bg-cream border border-fog text-charcoal focus:outline-none focus:border-moss transition"
               placeholder="表示名"
             />
             <button
               onClick={handleSaveName}
               disabled={saving || !displayName.trim()}
-              className="px-4 py-2.5 bg-moss text-cream rounded-xl text-sm font-medium hover:bg-moss-light transition disabled:opacity-50"
+              className="w-full py-2.5 bg-moss text-cream rounded-xl text-sm font-medium hover:bg-moss-light transition disabled:opacity-50"
             >
-              {saved ? '✓' : saving ? '...' : '保存'}
+              {saved ? '保存しました ✓' : saving ? '保存中...' : '保存する'}
             </button>
           </div>
         </div>

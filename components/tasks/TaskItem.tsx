@@ -52,14 +52,18 @@ export default function TaskItem({ task, users, currentUserId, onEdit }: Props) 
           {task.title}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
-          {assignee && (
+          {task.assignee_id === null ? (
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-shared-bg text-shared">
+              両方
+            </span>
+          ) : assignee ? (
             <span
               className="text-xs px-1.5 py-0.5 rounded-full"
               style={{ backgroundColor: assignee.color + '30', color: assignee.color }}
             >
               {assignee.display_name}
             </span>
-          )}
+          ) : null}
           {task.due_date && (
             <span className="text-xs text-moss-light">{task.due_date}</span>
           )}
