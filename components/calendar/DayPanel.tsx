@@ -24,7 +24,8 @@ function formatDateLabel(dateStr: string) {
 }
 
 export default function DayPanel({ date, events, users, currentUserId, onAddEvent, onEditEvent }: Props) {
-  function getUserInfo(id: string) {
+  function getUserInfo(id: string | null) {
+    if (id === null) return undefined
     return users.find(u => u.id === id)
   }
 
