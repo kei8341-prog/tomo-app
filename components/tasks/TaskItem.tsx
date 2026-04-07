@@ -8,14 +8,12 @@ type Props = {
   users: User[]
   currentUserId: string
   onEdit: (task: Task) => void
+  onReorder?: (task: Task, direction: 'up' | 'down') => void
+  isFirst?: boolean
+  isLast?: boolean
 }
 
-const ICON_MAP: Record<string, string> = {
-  cart: '🛒', check: '✓', wrench: '🔧', leaf: '🌿', home: '🏠',
-  repeat: '🔁', book: '📚', star: '⭐', coin: '💰', heart: '❤️', map: '📍', gift: '🎁',
-}
-
-export default function TaskItem({ task, users, currentUserId, onEdit }: Props) {
+export default function TaskItem({ task, users, currentUserId, onEdit, onReorder, isFirst, isLast }: Props) {
   const supabase = createClient()
   const assignee = users.find(u => u.id === task.assignee_id)
 
@@ -28,7 +26,7 @@ export default function TaskItem({ task, users, currentUserId, onEdit }: Props) 
 
   return (
     <div
-      className={`flex items-center gap-3 py-3 px-1 border-b border-fog/40 last:border-0 ${
+      className={`flex items-center gap-2 py-3 px-1 border-b border-fog/40 last:border-0 ${
         task.is_done ? 'opacity-50' : ''
       }`}
     >
@@ -72,6 +70,30 @@ export default function TaskItem({ task, users, currentUserId, onEdit }: Props) 
           )}
         </div>
       </div>
+
+      {/* 並び替えボタン（完了済みタスクには表示しない） */}
+      {!task.is_done && onReorder && (
+        <div className="flex flex-col gap-0.5 flex-shrink-0">
+          <button
+            onClick={() => onReorder(task, 'up')}
+            disabled={isFirst}
+            className="p-0.5 text-fog hover:text-moss-light transition disabled:opacity-20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+            </svg>
+          </button>
+          <button
+            onClick={() => onReorder(task, 'down')}
+            disabled={isLast}
+            className="p-0.5 text-fog hover:text-moss-light transition disabled:opacity-20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

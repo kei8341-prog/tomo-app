@@ -13,6 +13,7 @@ type Props = {
   onEditTask: (task: Task) => void
   onEditGroup: (group: TaskGroup) => void
   onDeleteGroup: (group: TaskGroup) => void
+  onReorder: (task: Task, direction: 'up' | 'down') => void
 }
 
 const ICON_MAP: Record<string, string> = {
@@ -20,7 +21,7 @@ const ICON_MAP: Record<string, string> = {
   repeat: '🔁', book: '📚', star: '⭐', coin: '💰', heart: '❤️', map: '📍', gift: '🎁',
 }
 
-export default function GroupCard({ group, tasks, users, currentUserId, onAddTask, onEditTask, onEditGroup, onDeleteGroup }: Props) {
+export default function GroupCard({ group, tasks, users, currentUserId, onAddTask, onEditTask, onEditGroup, onDeleteGroup, onReorder }: Props) {
   const [expanded, setExpanded] = useState(true)
 
   const doneTasks = tasks.filter(t => t.is_done)
@@ -65,13 +66,16 @@ export default function GroupCard({ group, tasks, users, currentUserId, onAddTas
 
       {expanded && (
         <div className="px-4 pb-2">
-          {ordered.map(task => (
+          {ordered.map((task, idx) => (
             <TaskItem
               key={task.id}
               task={task}
               users={users}
               currentUserId={currentUserId}
               onEdit={onEditTask}
+              onReorder={onReorder}
+              isFirst={idx === 0}
+              isLast={idx === pendingTasks.length - 1}
             />
           ))}
 

@@ -54,7 +54,12 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
                 style={{ borderLeft: `3px solid ${owner?.color ?? '#7A8FA8'}` }}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-charcoal truncate">{ev.title}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-charcoal truncate">{ev.title}</p>
+                    {ev.is_yearly && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-moss-pale text-moss flex-shrink-0">毎年</span>
+                    )}
+                  </div>
                   <p className="text-xs text-moss-light mt-0.5">
                     {formatTime(ev.start_at, ev.is_all_day)}
                     {ev.end_at && !ev.is_all_day && ` → ${formatTime(ev.end_at, false)}`}

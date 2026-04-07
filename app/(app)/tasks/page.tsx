@@ -121,6 +121,20 @@ export default function TasksPage() {
     setEditingGroup(null)
   }
 
+  async function handleReorder(task: Task, direction: 'up' | 'down') {
+    const groupTasks = tasks
+      .filter(t => t.group_id === task.group_id && !t.is_done)
+      .sort((a, b) => a.sort_order - b.sort_order)
+    const idx = groupTasks.findIndex(t => t.id === task.id)
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= groupTasks.length) return
+    const swapTask = groupTasks[swapIdx]
+    await Promise.all([
+      supabase.from('tasks').update({ sort_order: swapTask.sort_order }).eq('id', task.id),
+      supabase.from('tasks').update({ sort_order: task.sort_order }).eq('id', swapTask.id),
+    ])
+  }
+
   async function handleDeleteGroup(group: TaskGroup) {
     const hasTask = tasks.some(t => t.group_id === group.id)
     if (hasTask) {
@@ -165,6 +179,7 @@ export default function TasksPage() {
             onEditTask={task => { setEditingTask(task); setDefaultGroupId(undefined); setTaskSheetOpen(true) }}
             onEditGroup={openEditGroup}
             onDeleteGroup={handleDeleteGroup}
+            onReorder={handleReorder}
           />
         ))
       )}

@@ -53,16 +53,35 @@ export default function CalendarPage() {
     if (!coupleId) return
     const from = `${year}-${String(month + 1).padStart(2, '0')}-01`
     const to = `${year}-${String(month + 1).padStart(2, '0')}-${new Date(year, month + 1, 0).getDate()}`
+    const monthStr = String(month + 1).padStart(2, '0')
 
-    const { data } = await supabase
-      .from('events')
-      .select('*')
-      .eq('couple_id', coupleId)
-      .gte('start_at', `${from}T00:00:00`)
-      .lte('start_at', `${to}T23:59:59`)
-      .order('start_at')
+    const [{ data: regular }, { data: yearly }] = await Promise.all([
+      supabase
+        .from('events')
+        .select('*')
+        .eq('couple_id', coupleId)
+        .eq('is_yearly', false)
+        .gte('start_at', `${from}T00:00:00`)
+        .lte('start_at', `${to}T23:59:59`)
+        .order('start_at'),
+      supabase
+        .from('events')
+        .select('*')
+        .eq('couple_id', coupleId)
+        .eq('is_yearly', true)
+        .filter('start_at', 'like', `%-${monthStr}-%`)
+        .order('start_at'),
+    ])
 
-    setEvents(data ?? [])
+    // 毎年イベントの日付を今年に合わせる
+    const adjustedYearly: Event[] = (yearly ?? []).map(ev => {
+      const origDay = ev.start_at.slice(8, 10)
+      const newStart = `${year}-${monthStr}-${origDay}${ev.start_at.slice(10)}`
+      const newEnd = ev.end_at ? `${year}-${monthStr}-${origDay}${ev.end_at.slice(10)}` : null
+      return { ...ev, start_at: newStart, end_at: newEnd }
+    })
+
+    setEvents([...(regular ?? []), ...adjustedYearly].sort((a, b) => a.start_at.localeCompare(b.start_at)))
   }, [coupleId, year, month])
 
   useEffect(() => {

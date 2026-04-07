@@ -24,6 +24,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('10:00')
   const [isAllDay, setIsAllDay] = useState(false)
+  const [isYearly, setIsYearly] = useState(false)
   const [ownerId, setOwnerId] = useState(currentUser.id)
   const [memo, setMemo] = useState('')
   const [saving, setSaving] = useState(false)
@@ -37,11 +38,13 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
       setStartTime(event.start_at.slice(11, 16))
       setEndTime(event.end_at ? event.end_at.slice(11, 16) : '10:00')
       setOwnerId(event.owner_id)
+      setIsYearly(event.is_yearly)
       setMemo(event.memo ?? '')
     } else {
       setTitle('')
       setDate(defaultDate ?? '')
       setIsAllDay(false)
+      setIsYearly(false)
       setStartTime('09:00')
       setEndTime('10:00')
       setOwnerId(currentUser.id)
@@ -57,7 +60,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
     const end_at = isAllDay ? null : `${date}T${endTime}:00`
 
     if (isEdit && event) {
-      await supabase.from('events').update({ title, start_at, end_at, is_all_day: isAllDay, owner_id: ownerId, memo: memo || null }).eq('id', event.id)
+      await supabase.from('events').update({ title, start_at, end_at, is_all_day: isAllDay, is_yearly: isYearly, owner_id: ownerId, memo: memo || null }).eq('id', event.id)
     } else {
       await supabase.from('events').insert({
         couple_id: coupleId,
@@ -67,6 +70,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
         start_at,
         end_at,
         is_all_day: isAllDay,
+        is_yearly: isYearly,
         memo: memo || null,
       })
     }
@@ -116,6 +120,17 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
             className="accent-moss"
           />
           <label htmlFor="allday" className="text-sm text-charcoal">終日</label>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="yearly"
+            checked={isYearly}
+            onChange={e => setIsYearly(e.target.checked)}
+            className="accent-moss"
+          />
+          <label htmlFor="yearly" className="text-sm text-charcoal">毎年繰り返す（誕生日・記念日など）</label>
         </div>
 
         {!isAllDay && (
