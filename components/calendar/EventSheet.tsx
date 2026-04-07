@@ -121,23 +121,23 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
         </div>
 
         <div className="flex gap-3">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <label className="block text-sm text-bark mb-1">開始日</label>
             <input
               type="date"
               value={startDate}
               onChange={e => handleStartDateChange(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+              className="w-full px-2 py-2.5 rounded-xl bg-white border border-fog text-charcoal text-sm focus:outline-none focus:border-moss transition"
             />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <label className="block text-sm text-bark mb-1">終了日</label>
             <input
               type="date"
               value={endDate}
               min={startDate}
               onChange={e => setEndDate(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+              className="w-full px-2 py-2.5 rounded-xl bg-white border border-fog text-charcoal text-sm focus:outline-none focus:border-moss transition"
             />
           </div>
         </div>
@@ -166,22 +166,22 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
 
         {!isAllDay && (
           <div className="flex gap-3">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-sm text-bark mb-1">開始時刻</label>
               <input
                 type="time"
                 value={startTime}
                 onChange={e => setStartTime(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+                className="w-full px-2 py-2.5 rounded-xl bg-white border border-fog text-charcoal text-sm focus:outline-none focus:border-moss transition"
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-sm text-bark mb-1">終了時刻</label>
               <input
                 type="time"
                 value={endTime}
                 onChange={e => setEndTime(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+                className="w-full px-2 py-2.5 rounded-xl bg-white border border-fog text-charcoal text-sm focus:outline-none focus:border-moss transition"
               />
             </div>
           </div>
