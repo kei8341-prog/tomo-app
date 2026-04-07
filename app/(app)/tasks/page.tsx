@@ -36,10 +36,27 @@ export default function TasksPage() {
   const [defaultGroupId, setDefaultGroupId] = useState<string | undefined>()
 
   const [groupSheetOpen, setGroupSheetOpen] = useState(false)
+  const [editingGroup, setEditingGroup] = useState<TaskGroup | null>(null)
   const [groupName, setGroupName] = useState('')
   const [groupIcon, setGroupIcon] = useState<IconKey>('check')
   const [groupColor, setGroupColor] = useState('#6B7D72')
   const [savingGroup, setSavingGroup] = useState(false)
+
+  function openCreateGroup() {
+    setEditingGroup(null)
+    setGroupName('')
+    setGroupIcon('check')
+    setGroupColor('#6B7D72')
+    setGroupSheetOpen(true)
+  }
+
+  function openEditGroup(group: TaskGroup) {
+    setEditingGroup(group)
+    setGroupName(group.name)
+    setGroupIcon(group.icon_key)
+    setGroupColor(group.color)
+    setGroupSheetOpen(true)
+  }
 
   useEffect(() => {
     async function init() {
@@ -80,6 +97,30 @@ export default function TasksPage() {
     return () => { supabase.removeChannel(ch) }
   }, [coupleId, fetchData])
 
+  async function handleSaveGroup() {
+    if (!groupName.trim()) return
+    setSavingGroup(true)
+    if (editingGroup) {
+      await supabase.from('task_groups').update({
+        name: groupName,
+        icon_key: groupIcon,
+        color: groupColor,
+      }).eq('id', editingGroup.id)
+    } else {
+      const maxOrder = groups.reduce((m, g) => Math.max(m, g.sort_order), 0)
+      await supabase.from('task_groups').insert({
+        couple_id: coupleId,
+        name: groupName,
+        icon_key: groupIcon,
+        color: groupColor,
+        sort_order: maxOrder + 1,
+      })
+    }
+    setSavingGroup(false)
+    setGroupSheetOpen(false)
+    setEditingGroup(null)
+  }
+
   async function handleDeleteGroup(group: TaskGroup) {
     const hasTask = tasks.some(t => t.group_id === group.id)
     if (hasTask) {
@@ -87,24 +128,8 @@ export default function TasksPage() {
       return
     }
     await supabase.from('task_groups').delete().eq('id', group.id)
-  }
-
-  async function handleSaveGroup() {
-    if (!groupName.trim()) return
-    setSavingGroup(true)
-    const maxOrder = groups.reduce((m, g) => Math.max(m, g.sort_order), 0)
-    await supabase.from('task_groups').insert({
-      couple_id: coupleId,
-      name: groupName,
-      icon_key: groupIcon,
-      color: groupColor,
-      sort_order: maxOrder + 1,
-    })
-    setSavingGroup(false)
     setGroupSheetOpen(false)
-    setGroupName('')
-    setGroupIcon('check')
-    setGroupColor('#6B7D72')
+    setEditingGroup(null)
   }
 
   if (!currentUser) {
@@ -116,7 +141,7 @@ export default function TasksPage() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-2xl text-charcoal">タスク</h2>
         <button
-          onClick={() => setGroupSheetOpen(true)}
+          onClick={openCreateGroup}
           className="text-sm text-moss border border-moss rounded-xl px-3 py-1.5 hover:bg-moss-pale transition"
         >
           + グループ
@@ -138,6 +163,7 @@ export default function TasksPage() {
             currentUserId={currentUser.id}
             onAddTask={gid => { setDefaultGroupId(gid); setEditingTask(null); setTaskSheetOpen(true) }}
             onEditTask={task => { setEditingTask(task); setDefaultGroupId(undefined); setTaskSheetOpen(true) }}
+            onEditGroup={openEditGroup}
             onDeleteGroup={handleDeleteGroup}
           />
         ))
@@ -156,8 +182,8 @@ export default function TasksPage() {
         nextSortOrder={tasks.length}
       />
 
-      {/* グループ作成シート */}
-      <Sheet open={groupSheetOpen} onClose={() => setGroupSheetOpen(false)} title="グループを作成">
+      {/* グループ作成・編集シート */}
+      <Sheet open={groupSheetOpen} onClose={() => { setGroupSheetOpen(false); setEditingGroup(null) }} title={editingGroup ? 'グループを編集' : 'グループを作成'}>
         <div className="space-y-4 pb-6">
           <div>
             <label className="block text-sm text-bark mb-1">グループ名</label>
@@ -189,8 +215,15 @@ export default function TasksPage() {
 
           <div>
             <label className="block text-sm text-bark mb-2">カラー</label>
-            <div className="flex gap-2 flex-wrap">
-              {['#6B7D72', '#C4896A', '#6B8F7A', '#7A8FA8', '#5A4E3C', '#4A5C50'].map(c => (
+            <div className="grid grid-cols-6 gap-2">
+              {[
+                '#6B8F7A', '#4A5C50', '#7A9B8A', '#A8C5B0',
+                '#C4896A', '#A0522D', '#E8956D', '#D4A574',
+                '#7A8FA8', '#4A6080', '#8FA8C4', '#5A7A9B',
+                '#9B7DB5', '#7A5A9B', '#C4A8D4', '#B58FA8',
+                '#B5A55A', '#8B7A3A', '#D4C47A', '#C4B86A',
+                '#C47A8A', '#A05068', '#D4A0B0', '#8B4A5A',
+              ].map(c => (
                 <button
                   key={c}
                   onClick={() => setGroupColor(c)}
@@ -208,8 +241,17 @@ export default function TasksPage() {
             disabled={savingGroup || !groupName.trim()}
             className="w-full py-3 bg-moss text-cream rounded-xl font-medium hover:bg-moss-light transition disabled:opacity-50"
           >
-            {savingGroup ? '作成中...' : '作成する'}
+            {savingGroup ? '保存中...' : editingGroup ? '保存する' : '作成する'}
           </button>
+
+          {editingGroup && (
+            <button
+              onClick={() => handleDeleteGroup(editingGroup)}
+              className="w-full py-3 text-red-400 text-sm hover:text-red-600 transition"
+            >
+              このグループを削除する
+            </button>
+          )}
         </div>
       </Sheet>
     </div>
