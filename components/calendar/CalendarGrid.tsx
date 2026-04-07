@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import * as HolidayJP from '@holiday-jp/holiday_jp'
 import type { Event, User } from '@/lib/types'
 
 type Props = {
@@ -25,7 +26,6 @@ export default function CalendarGrid({
       ...Array(firstDay).fill(null),
       ...Array.from({ length: lastDate }, (_, i) => i + 1),
     ]
-    // 6週分になるよう末尾を埋める
     while (cells.length % 7 !== 0) cells.push(null)
     return cells
   }, [year, month])
@@ -39,6 +39,19 @@ export default function CalendarGrid({
     })
     return map
   }, [events])
+
+  const holidaySet = useMemo(() => {
+    const set = new Set<string>()
+    const lastDate = new Date(year, month + 1, 0).getDate()
+    for (let d = 1; d <= lastDate; d++) {
+      const date = new Date(year, month, d)
+      if (HolidayJP.isHoliday(date)) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+        set.add(dateStr)
+      }
+    }
+    return set
+  }, [year, month])
 
   function getUserColor(ownerId: string) {
     const user = users.find(u => u.id === ownerId)
@@ -79,6 +92,8 @@ export default function CalendarGrid({
           const isToday = dateStr === todayStr
           const isSelected = dateStr === selectedDate
           const dow = idx % 7
+          const isHoliday = holidaySet.has(dateStr)
+          const isSundayColor = dow === 0 || isHoliday
 
           return (
             <button
@@ -92,7 +107,7 @@ export default function CalendarGrid({
                 className={`text-xs w-6 h-6 flex items-center justify-center rounded-full font-medium ${
                   isToday
                     ? 'bg-moss text-cream'
-                    : dow === 0
+                    : isSundayColor
                     ? 'text-wife'
                     : dow === 6
                     ? 'text-shared'
