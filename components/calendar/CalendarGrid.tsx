@@ -32,20 +32,18 @@ export default function CalendarGrid({
 
   const eventsByDate = useMemo(() => {
     const map: Record<string, Event[]> = {}
-    events.forEach(ev => {
-      const start = ev.start_at.slice(0, 10)
-      const end = ev.end_at ? ev.end_at.slice(0, 10) : start
-      let cur = start
-      while (cur <= end) {
-        if (!map[cur]) map[cur] = []
-        map[cur].push(ev)
-        const d = new Date(cur + 'T00:00:00')
-        d.setDate(d.getDate() + 1)
-        cur = d.toISOString().slice(0, 10)
-      }
-    })
+    const lastDate = new Date(year, month + 1, 0).getDate()
+    for (let d = 1; d <= lastDate; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      const dayEvents = events.filter(ev => {
+        const start = ev.start_at.slice(0, 10)
+        const end = ev.end_at ? ev.end_at.slice(0, 10) : start
+        return dateStr >= start && dateStr <= end
+      })
+      if (dayEvents.length > 0) map[dateStr] = dayEvents
+    }
     return map
-  }, [events])
+  }, [events, year, month])
 
   const holidaySet = useMemo(() => {
     const set = new Set<string>()
