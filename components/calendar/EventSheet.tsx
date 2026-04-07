@@ -8,6 +8,7 @@ import type { Event, User } from '@/lib/types'
 type Props = {
   open: boolean
   onClose: () => void
+  onSaved?: () => void
   event?: Event | null
   defaultDate?: string
   currentUser: User
@@ -15,7 +16,7 @@ type Props = {
   coupleId: string
 }
 
-export default function EventSheet({ open, onClose, event, defaultDate, currentUser, users, coupleId }: Props) {
+export default function EventSheet({ open, onClose, onSaved, event, defaultDate, currentUser, users, coupleId }: Props) {
   const supabase = createClient()
   const isEdit = !!event
 
@@ -92,6 +93,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
     }
 
     setSaving(false)
+    onSaved?.()
     onClose()
   }
 
@@ -100,6 +102,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
     setDeleting(true)
     await supabase.from('events').delete().eq('id', event.id)
     setDeleting(false)
+    onSaved?.()
     onClose()
   }
 
@@ -158,7 +161,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
             onChange={e => setIsYearly(e.target.checked)}
             className="accent-moss"
           />
-          <label htmlFor="yearly" className="text-sm text-charcoal">毎年繰り返す（誕生日・記念日など）</label>
+          <label htmlFor="yearly" className="text-sm text-charcoal">毎年繰り返す</label>
         </div>
 
         {!isAllDay && (

@@ -133,6 +133,7 @@ export default function TasksPage() {
       supabase.from('tasks').update({ sort_order: swapTask.sort_order }).eq('id', task.id),
       supabase.from('tasks').update({ sort_order: task.sort_order }).eq('id', swapTask.id),
     ])
+    fetchData()
   }
 
   async function handleDeleteGroup(group: TaskGroup) {

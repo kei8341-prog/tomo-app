@@ -165,6 +165,7 @@ export default function CalendarPage() {
       <EventSheet
         open={sheetOpen}
         onClose={() => { setSheetOpen(false); setEditingEvent(null) }}
+        onSaved={fetchEvents}
         event={editingEvent}
         defaultDate={selectedDate}
         currentUser={currentUser}
