@@ -33,9 +33,16 @@ export default function CalendarGrid({
   const eventsByDate = useMemo(() => {
     const map: Record<string, Event[]> = {}
     events.forEach(ev => {
-      const date = ev.start_at.slice(0, 10)
-      if (!map[date]) map[date] = []
-      map[date].push(ev)
+      const start = ev.start_at.slice(0, 10)
+      const end = ev.end_at ? ev.end_at.slice(0, 10) : start
+      let cur = start
+      while (cur <= end) {
+        if (!map[cur]) map[cur] = []
+        map[cur].push(ev)
+        const d = new Date(cur + 'T00:00:00')
+        d.setDate(d.getDate() + 1)
+        cur = d.toISOString().slice(0, 10)
+      }
     })
     return map
   }, [events])
@@ -53,7 +60,8 @@ export default function CalendarGrid({
     return set
   }, [year, month])
 
-  function getUserColor(ownerId: string) {
+  function getUserColor(ownerId: string | null) {
+    if (ownerId === null) return '#7A8FA8'
     const user = users.find(u => u.id === ownerId)
     return user?.color ?? '#7A8FA8'
   }

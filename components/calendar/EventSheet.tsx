@@ -20,12 +20,13 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
   const isEdit = !!event
 
   const [title, setTitle] = useState('')
-  const [date, setDate] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('10:00')
   const [isAllDay, setIsAllDay] = useState(false)
   const [isYearly, setIsYearly] = useState(false)
-  const [ownerId, setOwnerId] = useState(currentUser.id)
+  const [ownerId, setOwnerId] = useState<string | null>(currentUser.id)
   const [memo, setMemo] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -33,7 +34,9 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
   useEffect(() => {
     if (event) {
       setTitle(event.title)
-      setDate(event.start_at.slice(0, 10))
+      const sd = event.start_at.slice(0, 10)
+      setStartDate(sd)
+      setEndDate(event.end_at ? event.end_at.slice(0, 10) : sd)
       setIsAllDay(event.is_all_day)
       setStartTime(event.start_at.slice(11, 16))
       setEndTime(event.end_at ? event.end_at.slice(11, 16) : '10:00')
@@ -42,7 +45,8 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
       setMemo(event.memo ?? '')
     } else {
       setTitle('')
-      setDate(defaultDate ?? '')
+      setStartDate(defaultDate ?? '')
+      setEndDate(defaultDate ?? '')
       setIsAllDay(false)
       setIsYearly(false)
       setStartTime('09:00')
@@ -52,25 +56,37 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
     }
   }, [event, defaultDate, currentUser.id])
 
+  // startDate が変わったとき endDate が前になっていたら合わせる
+  function handleStartDateChange(val: string) {
+    setStartDate(val)
+    if (endDate < val) setEndDate(val)
+  }
+
   async function handleSave() {
-    if (!title.trim() || !date) return
+    if (!title.trim() || !startDate) return
     setSaving(true)
 
-    const start_at = isAllDay ? `${date}T00:00:00` : `${date}T${startTime}:00`
-    const end_at = isAllDay ? null : `${date}T${endTime}:00`
+    const start_at = isAllDay ? `${startDate}T00:00:00` : `${startDate}T${startTime}:00`
+    let end_at: string | null
+    if (isAllDay) {
+      end_at = startDate !== endDate ? `${endDate}T00:00:00` : null
+    } else {
+      end_at = `${endDate}T${endTime}:00`
+    }
 
     if (isEdit && event) {
-      await supabase.from('events').update({ title, start_at, end_at, is_all_day: isAllDay, is_yearly: isYearly, owner_id: ownerId, memo: memo || null }).eq('id', event.id)
+      await supabase.from('events').update({
+        title, start_at, end_at,
+        is_all_day: isAllDay, is_yearly: isYearly,
+        owner_id: ownerId, memo: memo || null,
+      }).eq('id', event.id)
     } else {
       await supabase.from('events').insert({
         couple_id: coupleId,
         owner_id: ownerId,
         created_by: currentUser.id,
-        title,
-        start_at,
-        end_at,
-        is_all_day: isAllDay,
-        is_yearly: isYearly,
+        title, start_at, end_at,
+        is_all_day: isAllDay, is_yearly: isYearly,
         memo: memo || null,
       })
     }
@@ -101,14 +117,26 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-bark mb-1">日付</label>
-          <input
-            type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
-          />
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-sm text-bark mb-1">開始日</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={e => handleStartDateChange(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm text-bark mb-1">終了日</label>
+            <input
+              type="date"
+              value={endDate}
+              min={startDate}
+              onChange={e => setEndDate(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -136,7 +164,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
         {!isAllDay && (
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-sm text-bark mb-1">開始</label>
+              <label className="block text-sm text-bark mb-1">開始時刻</label>
               <input
                 type="time"
                 value={startTime}
@@ -145,7 +173,7 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm text-bark mb-1">終了</label>
+              <label className="block text-sm text-bark mb-1">終了時刻</label>
               <input
                 type="time"
                 value={endTime}
@@ -159,6 +187,14 @@ export default function EventSheet({ open, onClose, event, defaultDate, currentU
         <div>
           <label className="block text-sm text-bark mb-1">担当者</label>
           <div className="flex gap-2">
+            <button
+              onClick={() => setOwnerId(null)}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium border transition ${
+                ownerId === null ? 'border-transparent bg-shared text-cream' : 'border-fog bg-white text-charcoal'
+              }`}
+            >
+              両方
+            </button>
             {users.map(u => (
               <button
                 key={u.id}

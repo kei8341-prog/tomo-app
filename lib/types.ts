@@ -17,7 +17,7 @@ export type Couple = {
 export type Event = {
   id: string
   couple_id: string
-  owner_id: string
+  owner_id: string | null
   created_by: string
   title: string
   start_at: string

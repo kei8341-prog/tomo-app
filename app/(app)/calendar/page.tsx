@@ -61,8 +61,8 @@ export default function CalendarPage() {
         .select('*')
         .eq('couple_id', coupleId)
         .eq('is_yearly', false)
-        .gte('start_at', `${from}T00:00:00`)
         .lte('start_at', `${to}T23:59:59`)
+        .or(`end_at.gte.${from}T00:00:00,end_at.is.null,start_at.gte.${from}T00:00:00`)
         .order('start_at'),
       supabase
         .from('events')
@@ -111,7 +111,11 @@ export default function CalendarPage() {
     else setMonth(m => m + 1)
   }
 
-  const selectedEvents = events.filter(ev => ev.start_at.slice(0, 10) === selectedDate)
+  const selectedEvents = events.filter(ev => {
+    const start = ev.start_at.slice(0, 10)
+    const end = ev.end_at ? ev.end_at.slice(0, 10) : start
+    return start <= selectedDate && selectedDate <= end
+  })
 
   if (!currentUser) {
     return <div className="flex items-center justify-center h-screen text-moss-light">読み込み中...</div>

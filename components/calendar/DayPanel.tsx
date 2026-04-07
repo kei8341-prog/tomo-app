@@ -62,8 +62,15 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
                   </div>
                   <p className="text-xs text-moss-light mt-0.5">
                     {formatTime(ev.start_at, ev.is_all_day)}
-                    {ev.end_at && !ev.is_all_day && ` → ${formatTime(ev.end_at, false)}`}
-                    {owner && <span className="ml-2">{owner.display_name}</span>}
+                    {ev.end_at && !ev.is_all_day && ev.start_at.slice(0, 10) === ev.end_at.slice(0, 10) && ` → ${formatTime(ev.end_at, false)}`}
+                    {ev.end_at && ev.start_at.slice(0, 10) !== ev.end_at.slice(0, 10) && (
+                      <span className="ml-1">〜{ev.end_at.slice(5, 10).replace('-', '/')}まで</span>
+                    )}
+                    {ev.owner_id === null ? (
+                      <span className="ml-2 px-1.5 py-0.5 rounded-full bg-shared-bg text-shared text-xs">両方</span>
+                    ) : owner ? (
+                      <span className="ml-2">{owner.display_name}</span>
+                    ) : null}
                   </p>
                 </div>
               </li>
