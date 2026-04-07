@@ -142,6 +142,7 @@ export default function CalendarPage() {
       </div>
 
       {/* カレンダーグリッド */}
+      <div className="-mx-4">
       <CalendarGrid
         year={year}
         month={month}
@@ -151,6 +152,7 @@ export default function CalendarPage() {
         selectedDate={selectedDate}
         onSelectDate={setSelectedDate}
       />
+      </div>
 
       {/* 選択日の予定パネル */}
       <DayPanel
