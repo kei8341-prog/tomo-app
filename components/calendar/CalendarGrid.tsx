@@ -144,7 +144,7 @@ export default function CalendarGrid({
                     return (
                       <div
                         key={ev.id}
-                        className="text-[9px] leading-[13px] text-white rounded-sm mx-0.5 px-1 truncate"
+                        className="text-[9px] leading-[13px] text-white rounded-sm mx-0.5 px-1 overflow-hidden whitespace-nowrap"
                         style={{ backgroundColor: color }}
                       >
                         {ev.title}
@@ -163,7 +163,7 @@ export default function CalendarGrid({
                   return (
                     <div
                       key={ev.id}
-                      className={`text-[9px] leading-[13px] text-white truncate ${
+                      className={`text-[9px] leading-[13px] text-white overflow-hidden whitespace-nowrap ${
                         leftEdge ? 'ml-0.5 rounded-l-sm pl-1' : 'ml-0 pl-0.5'
                       } ${
                         rightEdge ? 'mr-0.5 rounded-r-sm' : 'mr-0'
