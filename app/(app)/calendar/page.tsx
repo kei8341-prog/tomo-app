@@ -145,7 +145,7 @@ export default function CalendarPage() {
           </svg>
         </button>
         <h2 className="font-heading text-2xl text-charcoal">
-          {year}年 {month + 1}月
+          {year}.{String(month + 1).padStart(2, '0')}
         </h2>
         <button onClick={nextMonth} className="p-2 text-moss-light hover:text-moss transition">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
