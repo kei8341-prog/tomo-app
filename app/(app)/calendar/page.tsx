@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import CalendarGrid from '@/components/calendar/CalendarGrid'
 import DayPanel from '@/components/calendar/DayPanel'
@@ -23,6 +23,7 @@ export default function CalendarPage() {
   const [coupleId, setCoupleId] = useState<string>('')
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
+  const touchStartX = useRef<number | null>(null)
 
   useEffect(() => {
     async function init() {
@@ -154,8 +155,17 @@ export default function CalendarPage() {
         </button>
       </div>
 
-      {/* カレンダーグリッド */}
-      <div className="-mx-4">
+      {/* カレンダーグリッド（左右スワイプで月移動） */}
+      <div
+        className="-mx-4"
+        onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
+        onTouchEnd={e => {
+          if (touchStartX.current === null) return
+          const diff = touchStartX.current - e.changedTouches[0].clientX
+          if (Math.abs(diff) > 50) diff > 0 ? nextMonth() : prevMonth()
+          touchStartX.current = null
+        }}
+      >
       <CalendarGrid
         year={year}
         month={month}
