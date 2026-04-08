@@ -5,6 +5,41 @@ import Sheet from '@/components/ui/Sheet'
 import { createClient } from '@/lib/supabase/client'
 import type { Event, User } from '@/lib/types'
 
+// 時刻入力コンポーネント（数字キーで入力できるよう時・分を分割）
+function TimeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const parts = value.match(/^(\d{1,2}):(\d{2})$/)
+  const hour = parts ? parseInt(parts[1]) : 0
+  const minute = parts ? parseInt(parts[2]) : 0
+
+  function update(h: number, m: number) {
+    const hh = String(Math.min(23, Math.max(0, isNaN(h) ? 0 : h))).padStart(2, '0')
+    const mm = String(Math.min(59, Math.max(0, isNaN(m) ? 0 : m))).padStart(2, '0')
+    onChange(`${hh}:${mm}`)
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-0.5 w-full px-2 py-2.5 rounded-xl bg-white border border-fog focus-within:border-moss transition">
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0} max={23}
+        value={hour}
+        onChange={e => update(parseInt(e.target.value), minute)}
+        className="w-10 text-center text-sm text-charcoal bg-transparent focus:outline-none"
+      />
+      <span className="text-charcoal font-medium text-sm select-none">:</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0} max={59} step={5}
+        value={minute}
+        onChange={e => update(hour, parseInt(e.target.value))}
+        className="w-10 text-center text-sm text-charcoal bg-transparent focus:outline-none"
+      />
+    </div>
+  )
+}
+
 type Props = {
   open: boolean
   onClose: () => void
@@ -191,21 +226,11 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
           <div className="flex gap-3">
             <div className="flex-1 min-w-0">
               <label className="block text-sm text-bark mb-1">開始時刻</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={e => setStartTime(e.target.value)}
-                className="w-full px-2 py-2.5 rounded-xl bg-white border border-fog text-charcoal text-sm focus:outline-none focus:border-moss transition"
-              />
+              <TimeInput value={startTime} onChange={setStartTime} />
             </div>
             <div className="flex-1 min-w-0">
               <label className="block text-sm text-bark mb-1">終了時刻</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={e => setEndTime(e.target.value)}
-                className="w-full px-2 py-2.5 rounded-xl bg-white border border-fog text-charcoal text-sm focus:outline-none focus:border-moss transition"
-              />
+              <TimeInput value={endTime} onChange={setEndTime} />
             </div>
           </div>
         )}
