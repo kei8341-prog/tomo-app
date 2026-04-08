@@ -144,7 +144,7 @@ export default function CalendarPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <h2 className="font-heading text-2xl text-charcoal">
+        <h2 className="text-3xl font-semibold tracking-widest text-charcoal">
           {year}.{String(month + 1).padStart(2, '0')}
         </h2>
         <button onClick={nextMonth} className="p-2 text-moss-light hover:text-moss transition">
