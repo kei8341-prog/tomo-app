@@ -17,12 +17,11 @@ type Props = {
 const DOW = ['日', '月', '火', '水', '木', '金', '土']
 
 // Layout constants (px)
-const CELL_H = 80       // h-20
-const HEADER_H = 28     // 曜日ヘッダー高さ
+const CELL_H = 96       // h-24
 const DATE_H = 30       // 日付数字エリア高さ (pt-1 + h-6 + mb-0.5)
 const BAR_H = 13        // イベントバー高さ
 const BAR_GAP = 2       // バー間隔
-const BAR_OFFSET = DATE_H + 2 // バー開始Y（セル内）
+const BAR_OFFSET = DATE_H + 2 // 複数日バー開始Y（セル内）
 
 export default function CalendarGrid({
   year, month, events, users, currentUserId, selectedDate, onSelectDate
@@ -191,7 +190,7 @@ export default function CalendarGrid({
         <div className="grid grid-cols-7">
           {days.map((day, idx) => {
             if (day === null) {
-              return <div key={`empty-${idx}`} style={{ height: CELL_H }} className="border-b border-r border-fog/30" />
+              return <div key={`empty-${idx}`} className="h-24 border-b border-r border-fog/30" />
             }
             const dateStr = toDateStr(day)
             const dayEvents = singleDayByDate[dateStr] ?? []
@@ -205,8 +204,7 @@ export default function CalendarGrid({
               <button
                 key={dateStr}
                 onClick={() => onSelectDate(dateStr)}
-                style={{ height: CELL_H }}
-                className={`flex flex-col pt-1 border-b border-r border-fog/30 transition w-full ${
+                className={`h-24 flex flex-col pt-1 border-b border-r border-fog/30 transition w-full ${
                   isSelected ? 'bg-moss-pale' : 'hover:bg-sand/50'
                 }`}
               >
@@ -226,9 +224,9 @@ export default function CalendarGrid({
                     {day}
                   </span>
                 </div>
-                {/* 単日イベント */}
-                <div className="w-full space-y-0.5 px-0.5">
-                  {dayEvents.slice(0, 2).map(ev => (
+                {/* 単日イベント（下部に配置して複数日オーバーレイと重ならない） */}
+                <div className="w-full space-y-0.5 px-0.5 mt-auto pb-1">
+                  {dayEvents.slice(0, 1).map(ev => (
                     <div
                       key={ev.id}
                       className="text-[9px] leading-[13px] text-white rounded-sm px-1 overflow-hidden whitespace-nowrap"
@@ -237,8 +235,8 @@ export default function CalendarGrid({
                       {ev.title}
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
-                    <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 2}</p>
+                  {dayEvents.length > 1 && (
+                    <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 1}</p>
                   )}
                 </div>
               </button>
