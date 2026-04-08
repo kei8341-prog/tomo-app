@@ -27,6 +27,7 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
   const [endTime, setEndTime] = useState('10:00')
   const [isAllDay, setIsAllDay] = useState(false)
   const [isYearly, setIsYearly] = useState(false)
+  const [isReminder, setIsReminder] = useState(false)
   const [ownerId, setOwnerId] = useState<string | null>(currentUser.id)
   const [memo, setMemo] = useState('')
   const [saving, setSaving] = useState(false)
@@ -43,6 +44,7 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
       setEndTime(event.end_at ? event.end_at.slice(11, 16) : '10:00')
       setOwnerId(event.owner_id)
       setIsYearly(event.is_yearly)
+      setIsReminder(event.is_reminder)
       setMemo(event.memo ?? '')
     } else {
       setTitle('')
@@ -50,6 +52,7 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
       setEndDate(defaultDate ?? '')
       setIsAllDay(false)
       setIsYearly(false)
+      setIsReminder(false)
       setStartTime('09:00')
       setEndTime('10:00')
       setOwnerId(currentUser.id)
@@ -78,7 +81,7 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
     if (isEdit && event) {
       await supabase.from('events').update({
         title, start_at, end_at,
-        is_all_day: isAllDay, is_yearly: isYearly,
+        is_all_day: isAllDay, is_yearly: isYearly, is_reminder: isReminder,
         owner_id: ownerId, memo: memo || null,
       }).eq('id', event.id)
     } else {
@@ -87,7 +90,7 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
         owner_id: ownerId,
         created_by: currentUser.id,
         title, start_at, end_at,
-        is_all_day: isAllDay, is_yearly: isYearly,
+        is_all_day: isAllDay, is_yearly: isYearly, is_reminder: isReminder,
         memo: memo || null,
       })
     }
@@ -118,6 +121,26 @@ export default function EventSheet({ open, onClose, onSaved, event, defaultDate,
             className="w-full px-4 py-2.5 rounded-xl bg-white border border-fog text-charcoal focus:outline-none focus:border-moss transition"
             placeholder="例：病院の予約"
           />
+        </div>
+
+        {/* 種類（予定 / リマインド） */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsReminder(false)}
+            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition ${
+              !isReminder ? 'border-transparent bg-moss text-cream' : 'border-fog bg-white text-charcoal'
+            }`}
+          >
+            予定
+          </button>
+          <button
+            onClick={() => setIsReminder(true)}
+            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition ${
+              isReminder ? 'border-transparent bg-shared text-cream' : 'border-fog bg-white text-charcoal'
+            }`}
+          >
+            🔔 リマインド
+          </button>
         </div>
 
         <div className="flex gap-3">

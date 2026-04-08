@@ -121,6 +121,26 @@ export default function TasksPage() {
     setEditingGroup(null)
   }
 
+  async function handleToggleTask(task: Task) {
+    // オプティミスティック更新
+    const newIsDone = !task.is_done
+    setTasks(prev => prev.map(t =>
+      t.id === task.id
+        ? { ...t, is_done: newIsDone, done_at: newIsDone ? new Date().toISOString() : null }
+        : t
+    ))
+    await supabase.from('tasks').update({
+      is_done: newIsDone,
+      done_at: newIsDone ? new Date().toISOString() : null,
+    }).eq('id', task.id)
+  }
+
+  async function handleDeleteTask(taskId: string) {
+    // オプティミスティック更新
+    setTasks(prev => prev.filter(t => t.id !== taskId))
+    await supabase.from('tasks').delete().eq('id', taskId)
+  }
+
   async function handleReorder(task: Task, direction: 'up' | 'down') {
     const groupTasks = tasks
       .filter(t => t.group_id === task.group_id && !t.is_done)
@@ -178,6 +198,8 @@ export default function TasksPage() {
             currentUserId={currentUser.id}
             onAddTask={gid => { setDefaultGroupId(gid); setEditingTask(null); setTaskSheetOpen(true) }}
             onEditTask={task => { setEditingTask(task); setDefaultGroupId(undefined); setTaskSheetOpen(true) }}
+            onToggleTask={handleToggleTask}
+            onDeleteTask={handleDeleteTask}
             onEditGroup={openEditGroup}
             onDeleteGroup={handleDeleteGroup}
             onReorder={handleReorder}
@@ -189,6 +211,7 @@ export default function TasksPage() {
       <TaskSheet
         open={taskSheetOpen}
         onClose={() => { setTaskSheetOpen(false); setEditingTask(null) }}
+        onSaved={fetchData}
         task={editingTask}
         defaultGroupId={defaultGroupId}
         currentUser={currentUser}

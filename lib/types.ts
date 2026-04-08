@@ -24,6 +24,7 @@ export type Event = {
   end_at: string | null
   is_all_day: boolean
   is_yearly: boolean
+  is_reminder: boolean
   memo: string | null
   created_at: string
 }

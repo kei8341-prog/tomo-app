@@ -14,6 +14,12 @@ type Props = {
   onSelectDate: (date: string) => void
 }
 
+type DayCell = {
+  day: number
+  inMonth: boolean
+  dateStr: string
+}
+
 const DOW = ['日', '月', '火', '水', '木', '金', '土']
 
 // Layout constants (px)
@@ -23,27 +29,51 @@ const BAR_H = 13        // イベントバー高さ
 const BAR_GAP = 2       // バー間隔
 const BAR_OFFSET = DATE_H + 2 // 複数日バー開始Y（セル内）
 
+function makeDateStr(y: number, m: number, d: number) {
+  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+}
+
 export default function CalendarGrid({
   year, month, events, users, currentUserId, selectedDate, onSelectDate
 }: Props) {
   const firstDay = useMemo(() => new Date(year, month, 1).getDay(), [year, month])
   const lastDate = useMemo(() => new Date(year, month + 1, 0).getDate(), [year, month])
 
-  const days = useMemo(() => {
-    const cells: (number | null)[] = [
-      ...Array(firstDay).fill(null),
-      ...Array.from({ length: lastDate }, (_, i) => i + 1),
-    ]
-    while (cells.length % 7 !== 0) cells.push(null)
+  const days = useMemo((): DayCell[] => {
+    const cells: DayCell[] = []
+
+    // 前月の日付
+    const prevYear = month === 0 ? year - 1 : year
+    const prevMonth = month === 0 ? 11 : month - 1
+    const prevLastDate = new Date(prevYear, prevMonth + 1, 0).getDate()
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = prevLastDate - i
+      cells.push({ day: d, inMonth: false, dateStr: makeDateStr(prevYear, prevMonth, d) })
+    }
+
+    // 当月の日付
+    for (let d = 1; d <= lastDate; d++) {
+      cells.push({ day: d, inMonth: true, dateStr: makeDateStr(year, month, d) })
+    }
+
+    // 翌月の日付（グリッドを7の倍数に補完）
+    const nextYear = month === 11 ? year + 1 : year
+    const nextMonth = month === 11 ? 0 : month + 1
+    let nextDay = 1
+    while (cells.length % 7 !== 0) {
+      cells.push({ day: nextDay, inMonth: false, dateStr: makeDateStr(nextYear, nextMonth, nextDay) })
+      nextDay++
+    }
+
     return cells
-  }, [firstDay, lastDate])
+  }, [firstDay, lastDate, year, month])
 
   const holidaySet = useMemo(() => {
     const set = new Set<string>()
     for (let d = 1; d <= lastDate; d++) {
       const date = new Date(year, month, d)
       if (HolidayJP.isHoliday(date)) {
-        set.add(`${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`)
+        set.add(makeDateStr(year, month, d))
       }
     }
     return set
@@ -55,7 +85,7 @@ export default function CalendarGrid({
   }
 
   function toDateStr(d: number) {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    return makeDateStr(year, month, d)
   }
 
   const todayStr = (() => {
@@ -150,7 +180,7 @@ export default function CalendarGrid({
     return segments
   }, [events, firstDay, lastDate, year, month])
 
-  // 単日イベント（複数日イベントを除く）
+  // 単日イベント（複数日イベントを除く）— 全セル対象
   const singleDayByDate = useMemo(() => {
     const multiIds = new Set(
       events
@@ -158,15 +188,14 @@ export default function CalendarGrid({
         .map(ev => ev.id)
     )
     const map: Record<string, Event[]> = {}
-    for (let d = 1; d <= lastDate; d++) {
-      const dateStr = toDateStr(d)
-      const dayEvents = events.filter(ev => !multiIds.has(ev.id) && ev.start_at.slice(0, 10) === dateStr)
-      if (dayEvents.length > 0) map[dateStr] = dayEvents
-    }
+    days.forEach(cell => {
+      const dayEvents = events.filter(ev => !multiIds.has(ev.id) && ev.start_at.slice(0, 10) === cell.dateStr)
+      if (dayEvents.length > 0) map[cell.dateStr] = dayEvents
+    })
     return map
-  }, [events, lastDate, year, month])
+  }, [events, days])
 
-  // 複数日イベントが通過している日付のセット
+  // 複数日イベントが通過している日付のセット（当月のみ）
   const multiDayDates = useMemo(() => {
     const set = new Set<string>()
     multiDaySegments.forEach(seg => {
@@ -200,17 +229,14 @@ export default function CalendarGrid({
       <div className="relative border-t border-fog/50">
         {/* 日付セルグリッド */}
         <div className="grid grid-cols-7">
-          {days.map((day, idx) => {
-            if (day === null) {
-              return <div key={`empty-${idx}`} className="h-24 border-b border-r border-fog/30" />
-            }
-            const dateStr = toDateStr(day)
+          {days.map((cell, idx) => {
+            const { day, inMonth, dateStr } = cell
             const dayEvents = singleDayByDate[dateStr] ?? []
             const isToday = dateStr === todayStr
             const isSelected = dateStr === selectedDate
             const dow = idx % 7
-            const isHoliday = holidaySet.has(dateStr)
-            const isSundayColor = dow === 0 || isHoliday
+            const isHoliday = inMonth && holidaySet.has(dateStr)
+            const isSundayColor = (dow === 0 || isHoliday) && inMonth
             const hasMultiDay = multiDayDates.has(dateStr)
 
             return (
@@ -225,7 +251,9 @@ export default function CalendarGrid({
                 <div className="flex justify-center mb-0.5">
                   <span
                     className={`text-xs w-6 h-6 flex items-center justify-center rounded-full font-medium ${
-                      isToday
+                      !inMonth
+                        ? 'text-fog/60'
+                        : isToday
                         ? 'bg-moss text-cream'
                         : isSundayColor
                         ? 'text-wife'
@@ -237,17 +265,23 @@ export default function CalendarGrid({
                     {day}
                   </span>
                 </div>
-                {/* 単日イベント（複数日バーがあれば下にずらす） */}
-                <div className={`w-full space-y-0.5 px-0.5 ${hasMultiDay ? 'mt-[18px]' : 'mt-0.5'}`}>
-                  {dayEvents.slice(0, 1).map(ev => (
-                    <div
-                      key={ev.id}
-                      className="text-[9px] leading-[13px] text-left text-white rounded-sm px-1 overflow-hidden whitespace-nowrap"
-                      style={{ backgroundColor: getUserColor(ev.owner_id) }}
-                    >
-                      {ev.title}
-                    </div>
-                  ))}
+                {/* イベント */}
+                <div className={`w-full space-y-0.5 px-0.5 ${hasMultiDay ? 'mt-[18px]' : 'mt-0.5'} ${!inMonth ? 'opacity-50' : ''}`}>
+                  {dayEvents.slice(0, 1).map(ev => {
+                    const color = getUserColor(ev.owner_id)
+                    return (
+                      <div
+                        key={ev.id}
+                        className="text-[9px] leading-[13px] text-left rounded-sm px-1 overflow-hidden whitespace-nowrap"
+                        style={ev.is_reminder
+                          ? { backgroundColor: '#FAF7F2', color, border: `1px solid ${color}` }
+                          : { backgroundColor: color, color: 'white' }
+                        }
+                      >
+                        {ev.is_reminder ? '🔔 ' : ''}{ev.title}
+                      </div>
+                    )
+                  })}
                   {dayEvents.length > 1 && (
                     <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 1}</p>
                   )}
@@ -266,22 +300,25 @@ export default function CalendarGrid({
             const color = getUserColor(seg.ev.owner_id)
             const rLeft = seg.isStart ? 3 : 0
             const rRight = seg.isEnd ? 3 : 0
+            const isReminder = seg.ev.is_reminder
 
             return (
               <div
                 key={`${seg.ev.id}-${i}`}
-                className="absolute text-[9px] leading-[13px] text-left text-white overflow-hidden whitespace-nowrap"
+                className="absolute text-[9px] leading-[13px] text-left overflow-hidden whitespace-nowrap"
                 style={{
                   top,
                   left: `calc(${leftPct}% + ${seg.isStart ? 2 : 0}px)`,
                   width: `calc(${widthPct}% - ${seg.isStart ? 2 : 0}px - ${seg.isEnd ? 2 : 0}px)`,
                   height: BAR_H,
-                  backgroundColor: color,
+                  backgroundColor: isReminder ? '#FAF7F2' : color,
+                  color: isReminder ? color : 'white',
+                  border: isReminder ? `1px solid ${color}` : 'none',
                   borderRadius: `${rLeft}px ${rRight}px ${rRight}px ${rLeft}px`,
                   paddingLeft: seg.isStart ? 4 : 2,
                 }}
               >
-                {seg.isStart ? seg.ev.title : '\u00A0'}
+                {seg.isStart ? (isReminder ? `🔔 ${seg.ev.title}` : seg.ev.title) : '\u00A0'}
               </div>
             )
           })}

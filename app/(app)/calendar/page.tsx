@@ -51,9 +51,20 @@ export default function CalendarPage() {
 
   const fetchEvents = useCallback(async () => {
     if (!coupleId) return
-    const from = `${year}-${String(month + 1).padStart(2, '0')}-01`
-    const to = `${year}-${String(month + 1).padStart(2, '0')}-${new Date(year, month + 1, 0).getDate()}`
     const monthStr = String(month + 1).padStart(2, '0')
+
+    // グレーアウト表示のため、グリッドに表示される前後月の日付も含めて取得
+    const gridFirstDay = new Date(year, month, 1).getDay()
+    const gridLastDate = new Date(year, month + 1, 0).getDate()
+    const totalCells = Math.ceil((gridFirstDay + gridLastDate) / 7) * 7
+    const nextDays = totalCells - gridFirstDay - gridLastDate
+    const gridStart = new Date(year, month, 1 - gridFirstDay)
+    const gridEnd = new Date(year, month, gridLastDate + nextDays)
+    function fmtDate(d: Date) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+    const from = fmtDate(gridStart)
+    const to = fmtDate(gridEnd)
 
     const [{ data: regular }, { data: yearly }] = await Promise.all([
       supabase

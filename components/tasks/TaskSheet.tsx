@@ -8,6 +8,7 @@ import type { Task, TaskGroup, User } from '@/lib/types'
 type Props = {
   open: boolean
   onClose: () => void
+  onSaved?: () => void
   task?: Task | null
   defaultGroupId?: string
   currentUser: User
@@ -17,7 +18,7 @@ type Props = {
   nextSortOrder: number
 }
 
-export default function TaskSheet({ open, onClose, task, defaultGroupId, currentUser, users, groups, coupleId, nextSortOrder }: Props) {
+export default function TaskSheet({ open, onClose, onSaved, task, defaultGroupId, currentUser, users, groups, coupleId, nextSortOrder }: Props) {
   const supabase = createClient()
   const isEdit = !!task
 
@@ -78,6 +79,7 @@ export default function TaskSheet({ open, onClose, task, defaultGroupId, current
     }
 
     setSaving(false)
+    onSaved?.()
     onClose()
   }
 
@@ -86,6 +88,7 @@ export default function TaskSheet({ open, onClose, task, defaultGroupId, current
     setDeleting(true)
     await supabase.from('tasks').delete().eq('id', task.id)
     setDeleting(false)
+    onSaved?.()
     onClose()
   }
 

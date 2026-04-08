@@ -51,11 +51,12 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
               <li
                 key={ev.id}
                 onClick={() => onEditEvent(ev)}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-sand/50 cursor-pointer transition"
-                style={{ borderLeft: `3px solid ${owner?.color ?? '#7A8FA8'}` }}
+                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition ${ev.is_reminder ? 'hover:bg-shared-bg/50' : 'hover:bg-sand/50'}`}
+                style={{ borderLeft: `3px ${ev.is_reminder ? 'dashed' : 'solid'} ${owner?.color ?? '#7A8FA8'}` }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
+                    {ev.is_reminder && <span className="text-xs flex-shrink-0">🔔</span>}
                     <p className="text-sm font-medium text-charcoal truncate">{ev.title}</p>
                     {ev.is_yearly && (
                       <span className="text-xs px-1.5 py-0.5 rounded-full bg-moss-pale text-moss flex-shrink-0">毎年</span>
