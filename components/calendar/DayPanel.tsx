@@ -13,8 +13,8 @@ type Props = {
 
 function formatTime(dateStr: string, isAllDay: boolean) {
   if (isAllDay) return '終日'
-  const d = new Date(dateStr)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  // new Date() はタイムゾーン変換が入るため、文字列から直接抽出する
+  return dateStr.slice(11, 16)
 }
 
 function formatDateLabel(dateStr: string) {
