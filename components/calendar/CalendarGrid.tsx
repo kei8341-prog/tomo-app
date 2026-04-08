@@ -166,6 +166,18 @@ export default function CalendarGrid({
     return map
   }, [events, lastDate, year, month])
 
+  // 複数日イベントが通過している日付のセット
+  const multiDayDates = useMemo(() => {
+    const set = new Set<string>()
+    multiDaySegments.forEach(seg => {
+      for (let col = seg.colStart; col <= seg.colEnd; col++) {
+        const day = seg.row * 7 + col - firstDay + 1
+        if (day >= 1 && day <= lastDate) set.add(toDateStr(day))
+      }
+    })
+    return set
+  }, [multiDaySegments, firstDay, lastDate, year, month])
+
   const totalRows = days.length / 7
 
   return (
@@ -199,6 +211,7 @@ export default function CalendarGrid({
             const dow = idx % 7
             const isHoliday = holidaySet.has(dateStr)
             const isSundayColor = dow === 0 || isHoliday
+            const hasMultiDay = multiDayDates.has(dateStr)
 
             return (
               <button
@@ -224,8 +237,8 @@ export default function CalendarGrid({
                     {day}
                   </span>
                 </div>
-                {/* 単日イベント（複数日バーの直下に配置） */}
-                <div className="w-full space-y-0.5 px-0.5 mt-[18px]">
+                {/* 単日イベント（複数日バーがあれば下にずらす） */}
+                <div className={`w-full space-y-0.5 px-0.5 ${hasMultiDay ? 'mt-[18px]' : 'mt-0.5'}`}>
                   {dayEvents.slice(0, 1).map(ev => (
                     <div
                       key={ev.id}
