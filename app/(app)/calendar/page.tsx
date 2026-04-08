@@ -114,11 +114,13 @@ export default function CalendarPage() {
   }, [coupleId, fetchEvents])
 
   function prevMonth() {
+    setEvents([])
     if (month === 0) { setYear(y => y - 1); setMonth(11) }
     else setMonth(m => m - 1)
   }
 
   function nextMonth() {
+    setEvents([])
     if (month === 11) { setYear(y => y + 1); setMonth(0) }
     else setMonth(m => m + 1)
   }
