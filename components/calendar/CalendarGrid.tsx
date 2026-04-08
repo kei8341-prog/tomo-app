@@ -224,12 +224,12 @@ export default function CalendarGrid({
                     {day}
                   </span>
                 </div>
-                {/* 単日イベント（下部に配置して複数日オーバーレイと重ならない） */}
-                <div className="w-full space-y-0.5 px-0.5 mt-auto pb-1">
+                {/* 単日イベント（複数日バーの直下に配置） */}
+                <div className="w-full space-y-0.5 px-0.5 mt-[18px]">
                   {dayEvents.slice(0, 1).map(ev => (
                     <div
                       key={ev.id}
-                      className="text-[9px] leading-[13px] text-white rounded-sm px-1 overflow-hidden whitespace-nowrap"
+                      className="text-[9px] leading-[13px] text-left text-white rounded-sm px-1 overflow-hidden whitespace-nowrap"
                       style={{ backgroundColor: getUserColor(ev.owner_id) }}
                     >
                       {ev.title}
@@ -257,7 +257,7 @@ export default function CalendarGrid({
             return (
               <div
                 key={`${seg.ev.id}-${i}`}
-                className="absolute text-[9px] leading-[13px] text-white overflow-hidden whitespace-nowrap"
+                className="absolute text-[9px] leading-[13px] text-left text-white overflow-hidden whitespace-nowrap"
                 style={{
                   top,
                   left: `calc(${leftPct}% + ${seg.isStart ? 2 : 0}px)`,
