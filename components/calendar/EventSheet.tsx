@@ -5,36 +5,56 @@ import Sheet from '@/components/ui/Sheet'
 import { createClient } from '@/lib/supabase/client'
 import type { Event, User } from '@/lib/types'
 
-// 時刻入力コンポーネント（数字キーで入力できるよう時・分を分割）
+// 時刻入力コンポーネント
+// - type="text" + inputMode="numeric" でモバイルでテンキー表示
+// - ローカル表示用 state を持ち、delete で完全に消せる
+// - フォーカス時に全選択、フォーカスを外したときにバリデーション
 function TimeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const parts = value.match(/^(\d{1,2}):(\d{2})$/)
-  const hour = parts ? parseInt(parts[1]) : 0
-  const minute = parts ? parseInt(parts[2]) : 0
+  const [hourStr, setHourStr] = useState(value.slice(0, 2))
+  const [minStr, setMinStr] = useState(value.slice(3, 5))
 
-  function update(h: number, m: number) {
-    const hh = String(Math.min(23, Math.max(0, isNaN(h) ? 0 : h))).padStart(2, '0')
-    const mm = String(Math.min(59, Math.max(0, isNaN(m) ? 0 : m))).padStart(2, '0')
-    onChange(`${hh}:${mm}`)
+  // 外部から value が変わったとき（別の予定を開いたとき等）に同期
+  useEffect(() => {
+    setHourStr(value.slice(0, 2))
+    setMinStr(value.slice(3, 5))
+  }, [value])
+
+  function commitHour(s: string) {
+    const h = Math.min(23, Math.max(0, parseInt(s) || 0))
+    const formatted = String(h).padStart(2, '0')
+    setHourStr(formatted)
+    onChange(`${formatted}:${value.slice(3, 5)}`)
+  }
+
+  function commitMin(s: string) {
+    const m = Math.min(59, Math.max(0, parseInt(s) || 0))
+    const formatted = String(m).padStart(2, '0')
+    setMinStr(formatted)
+    onChange(`${value.slice(0, 2)}:${formatted}`)
   }
 
   return (
-    <div className="flex items-center justify-center gap-0.5 w-full px-2 py-2.5 rounded-xl bg-white border border-fog focus-within:border-moss transition">
+    <div className="flex items-center justify-center gap-1 w-full px-3 py-2.5 rounded-xl bg-white border border-fog focus-within:border-moss transition">
       <input
-        type="number"
+        type="text"
         inputMode="numeric"
-        min={0} max={23}
-        value={hour}
-        onChange={e => update(parseInt(e.target.value), minute)}
-        className="w-10 text-center text-sm text-charcoal bg-transparent focus:outline-none"
+        maxLength={2}
+        value={hourStr}
+        onChange={e => setHourStr(e.target.value.replace(/\D/g, ''))}
+        onFocus={e => e.target.select()}
+        onBlur={e => commitHour(e.target.value)}
+        className="w-10 text-center text-base text-charcoal bg-transparent focus:outline-none"
       />
-      <span className="text-charcoal font-medium text-sm select-none">:</span>
+      <span className="text-charcoal font-semibold text-base select-none">:</span>
       <input
-        type="number"
+        type="text"
         inputMode="numeric"
-        min={0} max={59} step={5}
-        value={minute}
-        onChange={e => update(hour, parseInt(e.target.value))}
-        className="w-10 text-center text-sm text-charcoal bg-transparent focus:outline-none"
+        maxLength={2}
+        value={minStr}
+        onChange={e => setMinStr(e.target.value.replace(/\D/g, ''))}
+        onFocus={e => e.target.select()}
+        onBlur={e => commitMin(e.target.value)}
+        className="w-10 text-center text-base text-charcoal bg-transparent focus:outline-none"
       />
     </div>
   )
