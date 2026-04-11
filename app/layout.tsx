@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
+import PwaRegister from "@/components/ui/PwaRegister";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -15,14 +16,26 @@ const zenKaku = Zen_Kaku_Gothic_New({
 });
 
 export const metadata: Metadata = {
-  title: "Tomo — 夫婦カレンダー",
+  title: "Tomo",
   description: "2人で使う、予定とタスクの共有アプリ",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Tomo",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
+  themeColor: "#4A5C50",
 };
 
 export default function RootLayout({
@@ -32,7 +45,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`${cormorant.variable} ${zenKaku.variable}`}>
-      <body className="min-h-screen bg-cream text-charcoal">{children}</body>
+      <body className="min-h-screen bg-cream text-charcoal">
+        {children}
+        <PwaRegister />
+      </body>
     </html>
   );
 }
