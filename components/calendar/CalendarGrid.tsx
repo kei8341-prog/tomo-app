@@ -20,7 +20,7 @@ type DayCell = {
   dateStr: string
 }
 
-const DOW = ['日', '月', '火', '水', '木', '金', '土']
+const DOW = ['月', '火', '水', '木', '金', '土', '日'] // 月曜始まり
 
 // Layout constants (px)
 const CELL_H = 96       // h-24
@@ -36,7 +36,8 @@ function makeDateStr(y: number, m: number, d: number) {
 export default function CalendarGrid({
   year, month, events, users, currentUserId, selectedDate, onSelectDate
 }: Props) {
-  const firstDay = useMemo(() => new Date(year, month, 1).getDay(), [year, month])
+  // 月曜始まり: 月=0, 火=1, ... 土=5, 日=6
+  const firstDay = useMemo(() => (new Date(year, month, 1).getDay() + 6) % 7, [year, month])
   const lastDate = useMemo(() => new Date(year, month + 1, 0).getDate(), [year, month])
 
   const days = useMemo((): DayCell[] => {
@@ -217,7 +218,7 @@ export default function CalendarGrid({
           <div
             key={d}
             className={`text-center py-2 text-xs font-medium ${
-              i === 0 ? 'text-wife' : i === 6 ? 'text-shared' : 'text-moss-light'
+              i === 5 ? 'text-shared' : i === 6 ? 'text-wife' : 'text-moss-light'
             }`}
           >
             {d}
@@ -236,7 +237,8 @@ export default function CalendarGrid({
             const isSelected = dateStr === selectedDate
             const dow = idx % 7
             const isHoliday = inMonth && holidaySet.has(dateStr)
-            const isSundayColor = (dow === 0 || isHoliday) && inMonth
+            const isSundayColor = (dow === 6 || isHoliday) && inMonth // 日曜は6番目
+            const isSaturdayColor = dow === 5 && inMonth
             const hasMultiDay = multiDayDates.has(dateStr)
 
             return (
@@ -257,7 +259,7 @@ export default function CalendarGrid({
                         ? 'bg-moss text-cream'
                         : isSundayColor
                         ? 'text-wife'
-                        : dow === 6
+                        : isSaturdayColor
                         ? 'text-shared'
                         : 'text-charcoal'
                     }`}
@@ -267,7 +269,7 @@ export default function CalendarGrid({
                 </div>
                 {/* イベント */}
                 <div className={`w-full space-y-0.5 px-0.5 ${hasMultiDay ? 'mt-[18px]' : 'mt-0.5'} ${!inMonth ? 'opacity-50' : ''}`}>
-                  {dayEvents.slice(0, 1).map(ev => {
+                  {dayEvents.slice(0, 3).map(ev => {
                     const color = getUserColor(ev.owner_id)
                     return (
                       <div
@@ -282,8 +284,8 @@ export default function CalendarGrid({
                       </div>
                     )
                   })}
-                  {dayEvents.length > 1 && (
-                    <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 1}</p>
+                  {dayEvents.length > 3 && (
+                    <p className="text-[8px] text-moss-light pl-0.5">+{dayEvents.length - 3}</p>
                   )}
                 </div>
               </button>
