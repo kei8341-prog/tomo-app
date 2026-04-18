@@ -53,14 +53,14 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-cream border-t border-fog flex items-stretch h-16 z-40">
+    <nav className="fixed bottom-0 left-0 right-0 bg-cream border-t border-fog flex items-stretch z-40" style={{ height: '72px', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {items.map(({ href, label, Icon }) => {
         const active = pathname.startsWith(href)
         return (
           <Link
             key={href}
             href={href}
-            className="flex-1 flex flex-col items-center justify-center gap-1 relative transition"
+            className="flex-1 flex flex-col items-center justify-center gap-1.5 relative transition min-h-[72px]"
           >
             {/* thin gold indicator line at top when active */}
             {active && (

@@ -69,7 +69,7 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
                       <span className="ml-1">〜{ev.end_at.slice(5, 10).replace('-', '/')}まで</span>
                     )}
                     {ev.owner_id === null ? (
-                      <span className="ml-2 px-1.5 py-0.5 border border-shared text-shared text-xs tracking-wider">両方</span>
+                      <span className="ml-2 text-shared text-xs tracking-wider">両方</span>
                     ) : owner ? (
                       <span className="ml-2 tracking-wide">{owner.display_name}</span>
                     ) : null}
