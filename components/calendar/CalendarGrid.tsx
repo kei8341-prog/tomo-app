@@ -81,8 +81,8 @@ export default function CalendarGrid({
   }, [year, month, lastDate])
 
   function getUserColor(ownerId: string | null) {
-    if (ownerId === null) return '#7A8FA8'
-    return users.find(u => u.id === ownerId)?.color ?? '#7A8FA8'
+    if (ownerId === null) return '#B8922A'
+    return users.find(u => u.id === ownerId)?.color ?? '#B8922A'
   }
 
   function toDateStr(d: number) {
@@ -274,11 +274,12 @@ export default function CalendarGrid({
                     return (
                       <div
                         key={ev.id}
-                        className="text-[9px] leading-[13px] text-left rounded-sm px-1 overflow-hidden whitespace-nowrap"
-                        style={ev.is_reminder
-                          ? { backgroundColor: '#FAF7F2', color, border: `1px solid ${color}` }
-                          : { backgroundColor: color, color: 'white' }
-                        }
+                        className="text-[9px] leading-[13px] text-left px-1 overflow-hidden whitespace-nowrap"
+                        style={{
+                          backgroundColor: color + '18',
+                          color,
+                          borderLeft: `2px ${ev.is_reminder ? 'dashed' : 'solid'} ${color}`,
+                        }}
                       >
                         {ev.is_reminder ? '🔔 ' : ''}{ev.title}
                       </div>
@@ -313,10 +314,10 @@ export default function CalendarGrid({
                   left: `calc(${leftPct}% + ${seg.isStart ? 2 : 0}px)`,
                   width: `calc(${widthPct}% - ${seg.isStart ? 2 : 0}px - ${seg.isEnd ? 2 : 0}px)`,
                   height: BAR_H,
-                  backgroundColor: isReminder ? '#FAF7F2' : color,
-                  color: isReminder ? color : 'white',
-                  border: isReminder ? `1px solid ${color}` : 'none',
-                  borderRadius: `${rLeft}px ${rRight}px ${rRight}px ${rLeft}px`,
+                  backgroundColor: color + '18',
+                  color,
+                  borderLeft: seg.isStart ? `2px ${isReminder ? 'dashed' : 'solid'} ${color}` : 'none',
+                  borderRadius: 0,
                   paddingLeft: seg.isStart ? 4 : 2,
                 }}
               >

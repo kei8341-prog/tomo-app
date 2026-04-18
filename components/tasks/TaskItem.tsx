@@ -25,12 +25,12 @@ export default function TaskItem({ task, users, currentUserId, onEdit, onToggle,
         {/* チェックボックス */}
         <button
           onClick={() => onToggle(task)}
-          className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition ${
+          className={`w-4 h-4 border flex-shrink-0 flex items-center justify-center transition ${
             task.is_done ? 'border-moss bg-moss' : 'border-fog'
           }`}
         >
           {task.is_done && (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} className="w-3 h-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} className="w-2.5 h-2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
           )}

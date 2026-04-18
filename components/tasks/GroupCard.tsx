@@ -31,11 +31,11 @@ export default function GroupCard({ group, tasks, users, currentUserId, onAddTas
   const ordered = [...pendingTasks, ...doneTasks]
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-3">
+    <div className="bg-white overflow-hidden mb-4 border-t border-fog">
       {/* グループヘッダー */}
       <button
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-sand/30 transition"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-sand hover:bg-sand-mid transition border-b border-fog"
       >
         <span
           className="w-8 h-8 rounded-xl flex items-center justify-center text-base flex-shrink-0"

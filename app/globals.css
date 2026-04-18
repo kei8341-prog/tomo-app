@@ -1,29 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sand: #F0EAE0;
-  --color-sand-mid: #E4DAC8;
-  --color-moss: #4A5C50;
-  --color-moss-light: #6B7D72;
-  --color-moss-pale: #E8EDE9;
-  --color-charcoal: #2C2A26;
-  --color-bark: #5A4E3C;
-  --color-fog: #D8D2C8;
-  --color-cream: #FAF7F2;
-  --color-husband: #6B8F7A;
-  --color-husband-bg: #EAF1EC;
-  --color-wife: #C4896A;
-  --color-wife-bg: #F5EAE3;
-  --color-shared: #7A8FA8;
-  --color-shared-bg: #E8EDF3;
+  /* VCA — Ivory backgrounds */
+  --color-cream:      #FDFAF4;   /* main bg */
+  --color-sand:       #F5EFE3;   /* section bg */
+  --color-sand-mid:   #EDE3D1;   /* deeper section */
+  --color-fog:        #E8DECA;   /* borders / dividers */
+
+  /* VCA — Antique Gold accent (replaces moss green) */
+  --color-moss:       #B8922A;
+  --color-moss-light: #C8A84A;
+  --color-moss-pale:  #F2E8D0;
+
+  /* VCA — Ink (warm near-black) */
+  --color-charcoal:   #1A1510;
+  --color-bark:       #4A3F32;
+
+  /* VCA — Owner colors */
+  --color-wife:       #B8664A;   /* rose */
+  --color-wife-bg:    #F7EAE5;
+  --color-husband:    #4A6E7A;   /* slate blue */
+  --color-husband-bg: #E5EFF2;
+  --color-shared:     #B8922A;   /* gold (same as moss) */
+  --color-shared-bg:  #F2E8D0;
 
   --font-heading: var(--font-cormorant);
   --font-body: var(--font-zen-kaku);
 }
 
 :root {
-  --background: #FAF7F2;
-  --foreground: #2C2A26;
+  --background: #FDFAF4;
+  --foreground: #1A1510;
 }
 
 body {

@@ -30,7 +30,7 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-4 mt-3">
+    <div className="bg-cream p-4 mt-2 border-t border-fog">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-heading text-lg text-charcoal">{formatDateLabel(date)}</h3>
         <button
@@ -51,15 +51,15 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
               <li
                 key={ev.id}
                 onClick={() => onEditEvent(ev)}
-                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition ${ev.is_reminder ? 'hover:bg-shared-bg/50' : 'hover:bg-sand/50'}`}
-                style={{ borderLeft: `3px ${ev.is_reminder ? 'dashed' : 'solid'} ${owner?.color ?? '#7A8FA8'}` }}
+                className="flex items-center gap-3 py-3 px-2 cursor-pointer transition hover:bg-sand/40 border-b border-fog/40"
+                style={{ borderLeft: `2px ${ev.is_reminder ? 'dashed' : 'solid'} ${owner?.color ?? '#B8922A'}` }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     {ev.is_reminder && <span className="text-xs flex-shrink-0">🔔</span>}
                     <p className="text-sm font-medium text-charcoal truncate">{ev.title}</p>
                     {ev.is_yearly && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-moss-pale text-moss flex-shrink-0">毎年</span>
+                      <span className="text-xs px-1.5 py-0.5 border border-moss-pale text-moss flex-shrink-0 tracking-wider">毎年</span>
                     )}
                   </div>
                   <p className="text-xs text-moss-light mt-0.5">
@@ -69,9 +69,9 @@ export default function DayPanel({ date, events, users, currentUserId, onAddEven
                       <span className="ml-1">〜{ev.end_at.slice(5, 10).replace('-', '/')}まで</span>
                     )}
                     {ev.owner_id === null ? (
-                      <span className="ml-2 px-1.5 py-0.5 rounded-full bg-shared-bg text-shared text-xs">両方</span>
+                      <span className="ml-2 px-1.5 py-0.5 border border-shared text-shared text-xs tracking-wider">両方</span>
                     ) : owner ? (
-                      <span className="ml-2">{owner.display_name}</span>
+                      <span className="ml-2 tracking-wide">{owner.display_name}</span>
                     ) : null}
                   </p>
                 </div>
