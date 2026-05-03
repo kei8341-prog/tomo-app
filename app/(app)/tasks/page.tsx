@@ -136,9 +136,15 @@ export default function TasksPage() {
   }
 
   async function handleDeleteTask(taskId: string) {
-    // オプティミスティック更新
-    setTasks(prev => prev.filter(t => t.id !== taskId))
-    await supabase.from('tasks').delete().eq('id', taskId)
+    // オプティミスティック更新（元のタスクを退避して失敗時に戻す）
+    const prev = tasks.find(t => t.id === taskId)
+    setTasks(cur => cur.filter(t => t.id !== taskId))
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId)
+    if (error) {
+      // 削除失敗時は元に戻す
+      if (prev) setTasks(cur => [...cur, prev].sort((a, b) => a.sort_order - b.sort_order))
+      alert('削除に失敗しました。作成者のみ削除できます。')
+    }
   }
 
   async function handleReorder(task: Task, direction: 'up' | 'down') {
